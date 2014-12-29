@@ -19,12 +19,27 @@
  */
 package com.benhumphreys.jgitcassandra;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
+import org.eclipse.jgit.transport.Daemon;
+
 /**
- * Hello world!
- *
+ * A simple server that provides "git" protocol access to the repositories.
  */
 public class Server {
+
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        Daemon server = new Daemon(new InetSocketAddress(9418));
+        boolean uploadsEnabled = true;
+        server.getService("git-receive-pack").setEnabled(uploadsEnabled);
+        //server.setRepositoryResolver(new InMemoryRepositoryResolver()); // For testing
+        server.setRepositoryResolver(new CassandraRepositoryResolver());
+        try {
+            server.start();
+        } catch (IOException e) {
+            System.out.println("Failed to start server: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
