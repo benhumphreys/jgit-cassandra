@@ -6,6 +6,7 @@ an experiment for the purposes of learning some Git internals and to understand
 how to develop backends for JGit.
 
 *To build as a libary to use in your own program:*
+
     git clone <repository>
     cd jgit-cassandra
     mvn package
