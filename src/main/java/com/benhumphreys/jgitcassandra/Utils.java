@@ -16,35 +16,25 @@
  */
 package com.benhumphreys.jgitcassandra;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import org.eclipse.jgit.lib.Ref;
 
 /**
- * Unit test for simple Server class.
+ * 
+ * Utility functions shared between multiple classes
  */
-public class ServerTest extends TestCase {
+public class Utils {
     /**
-     * Create the test case
-     *
-     * @param testName
-     *            name of the test case
+     * Compares references by object id.
+     * @return true if the refs a & b have the same object id, also true if
+     *              the object ids for both refs are null, otherwise false
      */
-    public ServerTest(String testName) {
-        super(testName);
-    }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(ServerTest.class);
-    }
-
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp() {
-        assertTrue(true);
+    public static boolean refsHaveEqualObjectId(Ref a, Ref b) {
+        if (a.getObjectId() == null && b.getObjectId() == null) {
+            return true;
+        }
+        if (a.getObjectId() != null) {
+            return a.getObjectId().equals(b.getObjectId());
+        }
+        return false;
     }
 }

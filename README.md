@@ -5,8 +5,14 @@ Cassandra Backend For JGit
 an experiment for the purposes of learning some Git internals and to understand
 how to develop backends for JGit.
 
-To build and run the server:
+*To build as a libary to use in your own program:*
     git clone <repository>
     cd jgit-cassandra
+    mvn package
+
+The created JAR file can be found in the directory "target".
+
+*To build and run the simple test server:*
+
     mvn assembly:assembly
     java -jar ./target/jgit-cassandra-0.0.1-SNAPSHOT-jar-with-dependencies.jar

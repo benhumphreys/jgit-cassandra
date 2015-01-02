@@ -1,21 +1,18 @@
 /*
  * A Cassandra backend for JGit
- * Copyright (C) 2014  Ben Humphreys
+ * Copyright 2014 Ben Humphreys
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301, USA.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.benhumphreys.jgitcassandra.repo;
 
@@ -27,8 +24,10 @@ import org.eclipse.jgit.internal.storage.dfs.DfsRepository;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryBuilder;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
 
+import com.benhumphreys.jgitcassandra.store.StoreConnection;
+
 /**
- *
+ * A DfsRepository implemented with a Cassandra database store.
  */
 public class CassandraRepository extends DfsRepository {
     private final DfsObjDatabase objdb;
@@ -39,7 +38,8 @@ public class CassandraRepository extends DfsRepository {
      * @param repoDesc
      */
     @SuppressWarnings("rawtypes")
-    public CassandraRepository(DfsRepositoryDescription repoDesc) {
+    public CassandraRepository(DfsRepositoryDescription repoDesc, StoreConnection conn)
+            throws IOException {
         super(new DfsRepositoryBuilder<DfsRepositoryBuilder, CassandraRepository>() {
             @Override
             public CassandraRepository build() throws IOException {
@@ -47,8 +47,8 @@ public class CassandraRepository extends DfsRepository {
             }
         }.setRepositoryDescription(repoDesc));
 
-        objdb = new CassandraObjDatabase(this);
-        refdb = new CassandraRefDatabase(this);
+        objdb = new CassandraObjDatabase(this, conn);
+        refdb = new CassandraRefDatabase(this, conn);
     }
 
     @Override

@@ -14,37 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.benhumphreys.jgitcassandra;
-
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+package com.benhumphreys.jgitcassandra.store;
 
 /**
- * Unit test for simple Server class.
+ * Maps reference types to ints.
+ * Used for storage of the reference type (encoded as an int) in the refs
+ * table.
  */
-public class ServerTest extends TestCase {
-    /**
-     * Create the test case
-     *
-     * @param testName
-     *            name of the test case
-     */
-    public ServerTest(String testName) {
-        super(testName);
+public enum RefType {
+    SYMBOLIC(1),
+    PEELED_NONTAG(2),
+    PEELED_TAG(3),
+    UNPEELED(4);
+    
+    private final int value;
+    
+    private RefType(int value) {
+        this.value = value;
     }
-
-    /**
-     * @return the suite of tests being tested
-     */
-    public static Test suite() {
-        return new TestSuite(ServerTest.class);
-    }
-
-    /**
-     * Rigourous Test :-)
-     */
-    public void testApp() {
-        assertTrue(true);
+    
+    public int getValue() {
+        return value;
     }
 }
