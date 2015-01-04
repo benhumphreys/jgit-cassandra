@@ -1,6 +1,6 @@
 /*
  * A Cassandra backend for JGit
- * Copyright 2014 Ben Humphreys
+ * Copyright 2014-2015 Ben Humphreys
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ import com.benhumphreys.jgitcassandra.Utils;
 import com.datastax.driver.core.ResultSet;
 import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
-import com.datastax.driver.core.SimpleStatement;
 import com.datastax.driver.core.Statement;
+import com.datastax.driver.core.querybuilder.QueryBuilder;
 
 /**
  * Provides access to the Ref store.
@@ -45,6 +45,11 @@ public class RefStore {
      * Cassandra fetch size
      */
     private static final int FETCH_SIZE = 100;
+    
+    /**
+     * Refs table name
+     */
+    private static String TABLE_NAME = "refs";
 
     /**
      * The keyspace acts as a namespace
@@ -83,8 +88,11 @@ public class RefStore {
      */
     public Ref get(String name) throws IOException {
         try {
-            Statement stmt = new SimpleStatement("SELECT * FROM "
-                    + tableName() + " WHERE name = '" + name + "';");
+            Statement stmt = QueryBuilder
+                    .select()
+                    .all()
+                    .from(keyspace, TABLE_NAME)
+                    .where(QueryBuilder.eq("name", name));
             ResultSet results = session.execute(stmt);
             Ref r = rowToRef(results.one());
             if (!results.isExhausted()) {
@@ -93,6 +101,7 @@ public class RefStore {
             }
             return r;
         } catch (RuntimeException e) {
+            e.printStackTrace();
             throw new IOException(e);
         }
     }
@@ -105,8 +114,10 @@ public class RefStore {
     public Collection<Ref> values()  throws IOException {
         try {
             List<Ref> refs = new ArrayList<Ref>();
-            Statement stmt = new SimpleStatement("SELECT * FROM "
-                    + tableName() + ";");
+            Statement stmt = QueryBuilder
+                    .select()
+                    .all()
+                    .from(keyspace, TABLE_NAME);
             stmt.setFetchSize(FETCH_SIZE);
             ResultSet results = session.execute(stmt);
             for (Row row : results) {
@@ -114,6 +125,7 @@ public class RefStore {
             }
             return refs;
         } catch (RuntimeException e) {
+            e.printStackTrace();
             throw new IOException(e);
         }
     }
@@ -184,22 +196,19 @@ public class RefStore {
      *                      database
      */
     private void createSchemaIfNotExist() throws IOException {
-        session.execute("CREATE KEYSPACE IF NOT EXISTS " + keyspace
-                + " WITH replication = {'class':'SimpleStrategy',"
-                + " 'replication_factor':1};");
+        try {
+            session.execute("CREATE KEYSPACE IF NOT EXISTS " + keyspace
+                    + " WITH replication = {'class':'SimpleStrategy',"
+                    + " 'replication_factor':1};");
 
-        session.execute("CREATE TABLE IF NOT EXISTS " + tableName() + " ("
-                + "name varchar PRIMARY KEY,"
-                + "type int,"
-                + "value varchar,"
-                + "aux_value varchar);");
-    }
-
-    /**
-     * Returns the fully qualified tablename, with the form: "<keyspace>.refs"
-     */
-    private String tableName() {
-        return keyspace + ".refs";
+            session.execute("CREATE TABLE IF NOT EXISTS "
+                    + keyspace + "." + TABLE_NAME
+                    + " (name varchar PRIMARY KEY, type int, value varchar, "
+                    + "aux_value varchar);");
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            throw new IOException(e);
+        }
     }
 
     /**
@@ -249,12 +258,12 @@ public class RefStore {
         if (r instanceof SymbolicRef) {
             putRow(name, RefType.SYMBOLIC, r.getTarget().getName(), "");
         } else if (r instanceof ObjectIdRef.PeeledNonTag) {
-            putRow(name, RefType.PEELED_NONTAG, r.getObjectId().toString(), "");
+            putRow(name, RefType.PEELED_NONTAG, r.getObjectId().name(), "");
         } else if (r instanceof ObjectIdRef.PeeledTag){
-            putRow(name, RefType.PEELED_TAG, r.getObjectId().toString(),
+            putRow(name, RefType.PEELED_TAG, r.getObjectId().name(),
                     r.getPeeledObjectId().toString());
         } else if (r instanceof ObjectIdRef.Unpeeled) {
-            putRow(name, RefType.UNPEELED, r.getObjectId().toString(), "");
+            putRow(name, RefType.UNPEELED, r.getObjectId().name(), "");
         } else {
             throw new IllegalStateException("Unhandled ref type: " + r);
         }
@@ -278,14 +287,15 @@ public class RefStore {
     private void putRow(String name, RefType type, String value, String auxValue)
             throws IOException {
         try {
-            session.execute("INSERT INTO " + tableName()
-                    + "(name, type, value, aux_value) VALUES "
-                    + "'" + name + "',"
-                    + "'" + type.getValue() + "',"
-                    + "'" + value + "',"
-                    + "'" + auxValue + "',"
-                    + ");");
+            Statement stmt = QueryBuilder.insertInto(keyspace, TABLE_NAME)
+                    .value("name", name)
+                    .value("type", type.getValue())
+                    .value("value", value)
+                    .value("aux_value", auxValue);           
+            
+            session.execute(stmt);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             throw new IOException(e);
         }
     }
@@ -300,9 +310,12 @@ public class RefStore {
      */
     private void removeRef(String name) throws IOException {
         try {
-            session.execute("DELETE FROM " + tableName() + " WHERE name = '"
-                    + name + "');");
+            Statement stmt = QueryBuilder.delete()
+                    .from(keyspace, TABLE_NAME)
+                    .where (QueryBuilder.eq("name", name));
+            session.execute(stmt);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             throw new IOException(e);
         }
     }

@@ -16,9 +16,10 @@
  */
 package com.benhumphreys.jgitcassandra;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jgit.errors.RepositoryNotFoundException;
 import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
@@ -61,7 +62,7 @@ final class CassandraRepositoryResolver implements
             repo = new CassandraRepository(
                     new DfsRepositoryDescription(sanitiseName(name)),
                     storeconn);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new ServiceMayNotContinueException(e);
             }
             repositories.put(name, repo);
@@ -69,14 +70,28 @@ final class CassandraRepositoryResolver implements
         return repo;
     }
     
-    static String sanitiseName(String name) {
-        String s = name.toLowerCase();
-        int idx = s.indexOf(".git");
-        if (idx >= 0) {
-            return s.substring(0, idx).trim();
+    /**
+     * Trims the ".git" from the end of the name and sanitises.
+     * 
+     * Since the name forms the keyspace, and is input by the user, we need to
+     * ensure the name is sanitised. Currently only support alpha-numeric, plus
+     * hyphen and underscore characters in names.
+     * 
+     * @param name
+     * @return
+     * @throws IllegalArgumentException
+     */
+    static String sanitiseName(String name) throws IllegalArgumentException {
+        String str = name.toLowerCase().trim();
+        int idx = str.indexOf(".git");
+        str = (idx >= 0) ? str.substring(0, idx) : str;
+
+        Pattern p = Pattern.compile("^[a-zA-Z0-9-_]+$");
+        Matcher m = p.matcher(str);
+        if (m.matches()) {
+            return str;
         } else {
-            return s.trim();
+            throw new IllegalArgumentException("Invalid name: " + name);
         }
-                
     }
 }
