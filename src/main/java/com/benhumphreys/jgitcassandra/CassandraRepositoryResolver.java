@@ -39,14 +39,14 @@ import com.benhumphreys.jgitcassandra.store.StoreConnection;
  */
 final class CassandraRepositoryResolver implements
         RepositoryResolver<DaemonClient> {
-    StoreConnection storeconn;
-    
+    private final StoreConnection storeconn;
+
     /**
      * Maps repository names to repository instances
      */
     private final static Map<String, CassandraRepository> repositories =
             new HashMap<String, CassandraRepository>();
-    
+
     public CassandraRepositoryResolver(StoreConnection conn) {
         storeconn = conn;
     }
@@ -59,9 +59,9 @@ final class CassandraRepositoryResolver implements
         CassandraRepository repo = repositories.get(name);
         if (repo == null) {
             try {
-            repo = new CassandraRepository(
-                    new DfsRepositoryDescription(sanitiseName(name)),
-                    storeconn);
+                repo = new CassandraRepository(
+                        new DfsRepositoryDescription(sanitiseName(name)),
+                        storeconn);
             } catch (Exception e) {
                 throw new ServiceMayNotContinueException(e);
             }
@@ -69,14 +69,14 @@ final class CassandraRepositoryResolver implements
         }
         return repo;
     }
-    
+
     /**
      * Trims the ".git" from the end of the name and sanitises.
-     * 
+     * <p/>
      * Since the name forms the keyspace, and is input by the user, we need to
      * ensure the name is sanitised. Currently only support alpha-numeric, plus
      * hyphen and underscore characters in names.
-     * 
+     *
      * @param name
      * @return
      * @throws IllegalArgumentException

@@ -36,7 +36,7 @@ import org.eclipse.jgit.transport.resolver.ServiceNotEnabledException;
  */
 final class InMemoryRepositoryResolver implements
         RepositoryResolver<DaemonClient> {
-    
+
     /**
      * Maps repository names to repository instances
      */

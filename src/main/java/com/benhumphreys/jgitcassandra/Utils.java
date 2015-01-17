@@ -19,14 +19,14 @@ package com.benhumphreys.jgitcassandra;
 import org.eclipse.jgit.lib.Ref;
 
 /**
- * 
  * Utility functions shared between multiple classes
  */
 public class Utils {
     /**
      * Compares references by object id.
+     *
      * @return true if the refs a & b have the same object id, also true if
-     *              the object ids for both refs are null, otherwise false
+     * the object ids for both refs are null, otherwise false
      */
     public static boolean refsHaveEqualObjectId(Ref a, Ref b) {
         if (a.getObjectId() == null && b.getObjectId() == null) {

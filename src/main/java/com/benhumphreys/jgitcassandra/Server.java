@@ -36,7 +36,7 @@ public class Server {
             return;
         }
         StoreConnection conn = new StoreConnection(Arrays.asList(args));
-        
+
         // Start the Git server
         Daemon server = new Daemon(new InetSocketAddress(9418));
         boolean uploadsEnabled = true;

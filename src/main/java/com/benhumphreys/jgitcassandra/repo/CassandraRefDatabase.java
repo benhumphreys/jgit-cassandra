@@ -38,8 +38,9 @@ class CassandraRefDatabase extends DfsRefDatabase {
 
     /**
      * Constructor
-     * @param repository    a reference to the repository this ref database
-     *                      is associated with.
+     *
+     * @param repository a reference to the repository this ref database
+     *                   is associated with.
      */
     public CassandraRefDatabase(DfsRepository repository, StoreConnection conn)
             throws IOException {
@@ -51,12 +52,12 @@ class CassandraRefDatabase extends DfsRefDatabase {
     /**
      * Compare a reference, and put if it matches.
      *
-     * @param oldRef    old value to compare to. If the reference is expected
-     *                  to not exist the old value has a storage of
-     *                  Ref.Storage.NEW and an ObjectId value of null.
-     * @param newRef    new reference to store.
+     * @param oldRef old value to compare to. If the reference is expected
+     *               to not exist the old value has a storage of
+     *               Ref.Storage.NEW and an ObjectId value of null.
+     * @param newRef new reference to store.
      * @return true if the put was successful; false otherwise.
-     * @throws IOException  the reference cannot be put due to a system error.
+     * @throws IOException the reference cannot be put due to a system error.
      */
     @Override
     protected boolean compareAndPut(Ref oldRef, Ref newRef) throws IOException {
@@ -74,10 +75,10 @@ class CassandraRefDatabase extends DfsRefDatabase {
     /**
      * Compare a reference, and delete if it matches.
      *
-     * @param oldRef    the old reference information that was previously read.
+     * @param oldRef the old reference information that was previously read.
      * @return true     if the remove was successful; false otherwise.
-     * @throws IOException  the reference could not be removed due to a system
-     *                      error.
+     * @throws IOException the reference could not be removed due to a system
+     *                     error.
      */
     @Override
     protected boolean compareAndRemove(Ref oldRef) throws IOException {
@@ -91,11 +92,11 @@ class CassandraRefDatabase extends DfsRefDatabase {
     }
 
     /**
-    * Read all known references in the repository.
-    *
-    * @return all current references of the repository.
-    * @throws IOException   references cannot be accessed.
-    */
+     * Read all known references in the repository.
+     *
+     * @return all current references of the repository.
+     * @throws IOException references cannot be accessed.
+     */
     @Override
     protected RefCache scanAllRefs() throws IOException {
         RefList.Builder<Ref> ids = new RefList.Builder<Ref>();

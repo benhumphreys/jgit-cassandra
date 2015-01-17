@@ -16,4 +16,7 @@ The created JAR file can be found in the directory "target".
 *To build and run the simple test server:*
 
     mvn assembly:assembly
-    java -jar ./target/jgit-cassandra-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+    java -jar ./target/jgit-cassandra-0.0.1-SNAPSHOT-jar-with-dependencies.jar <NODE> [NODE....]
+
+The hostname or IP address of one or more Cassandra nodes must be passed on the
+command line.

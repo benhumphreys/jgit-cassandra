@@ -35,21 +35,23 @@ import com.datastax.driver.core.querybuilder.QueryBuilder;
 
 /**
  * Provides access to the Ref store.
- * 
+ * <p/>
  * This class provides map (i.e. key/value) semantics, mapping a "name" to
  * a Ref. The map exists within a namespace identified by the "keyspace".
  * Key/value pairs are distinct within a keyspace.
  */
 public class RefStore {
     /**
-     * Cassandra fetch size
+     * Cassandra fetch size. This won't limit the size of a query result set, but
+     * a large result set will be broken up into multiple fetches if the result set
+     * size exceeds FETCH_SIZE
      */
     private static final int FETCH_SIZE = 100;
-    
+
     /**
      * Refs table name
      */
-    private static String TABLE_NAME = "refs";
+    private static final String TABLE_NAME = "refs";
 
     /**
      * The keyspace acts as a namespace
@@ -63,11 +65,12 @@ public class RefStore {
 
     /**
      * Constructor
-     * @param keyspace      the Cassandra keyspace
-     * @param session       a Cassandra session instance
+     *
+     * @param keyspace the Cassandra keyspace
+     * @param session  a Cassandra session instance
      * @throws NullPointerException if either of the parameters are null
-     * @throws IOException  if an exception occurs when communicating to the
-     *                      database
+     * @throws IOException          if an exception occurs when communicating to the
+     *                              database
      */
     public RefStore(String keyspace, Session session) throws IOException {
         if (keyspace == null || session == null) {
@@ -80,11 +83,12 @@ public class RefStore {
 
     /**
      * Returns the Ref to which the specified name is mapped
-     * @param name  the name whose associated value is to be returned
-     * @return      the Ref to which the specified name is mapped, or null if
-     *              the store contains no mapping for the name
-     * @throws IOException  if an exception occurs when communicating to the
-     *                      database
+     *
+     * @param name the name whose associated value is to be returned
+     * @return the Ref to which the specified name is mapped, or null if
+     * the store contains no mapping for the name
+     * @throws IOException if an exception occurs when communicating to the
+     *                     database
      */
     public Ref get(String name) throws IOException {
         try {
@@ -108,10 +112,10 @@ public class RefStore {
 
     /**
      * @return a Collection view of all refs in the store
-     * @throws IOException  if an exception occurs when communicating to the
-     *                      database
+     * @throws IOException if an exception occurs when communicating to the
+     *                     database
      */
-    public Collection<Ref> values()  throws IOException {
+    public Collection<Ref> values() throws IOException {
         try {
             List<Ref> refs = new ArrayList<Ref>();
             Statement stmt = QueryBuilder
@@ -133,33 +137,33 @@ public class RefStore {
     /**
      * If the specified "name" is not already associated with a "Ref",
      * associate it with the given "Ref".
-     * @param name      the name (i.e. key) with which the specified value is
-     *                  to be associated
-     * @param newRef    the Ref to be associated with the specified name
-     * @return  the previous Ref associated with the specified name, or null if
-     *          there was no mapping for the name.
-     * @throws IOException  if an exception occurs when communicating to the
-     *                      database
+     *
+     * @param name   the name (i.e. key) with which the specified value is
+     *               to be associated
+     * @param newRef the Ref to be associated with the specified name
+     * @return the previous Ref associated with the specified name, or null if
+     * there was no mapping for the name.
+     * @throws IOException if an exception occurs when communicating to the
+     *                     database
      */
     public Ref putIfAbsent(String name, Ref newRef) throws IOException {
         final Ref cur = get(name);
         if (cur == null) {
             putRef(name, newRef);
-            return newRef;
-        } else {
-            return cur;
         }
+        return cur;
     }
 
     /**
      * Replaces the entry for a name only if currently mapped to a given Ref.
-     * @param name      name  which the specified value is associated
-     * @param cur       Ref expected to be currently associated with the
-     *                  specified key
-     * @param newRef    Ref to be associated with the specified key
-     * @return          true if the value was replaced
-     * @throws IOException  if an exception occurs when communicating to the
-     *                      database
+     *
+     * @param name   name  which the specified value is associated
+     * @param cur    Ref expected to be currently associated with the
+     *               specified key
+     * @param newRef Ref to be associated with the specified key
+     * @return true if the value was replaced
+     * @throws IOException if an exception occurs when communicating to the
+     *                     database
      */
     public boolean replace(String name, Ref cur, Ref newRef) throws IOException {
         final Ref curInStore = get(name);
@@ -173,11 +177,12 @@ public class RefStore {
 
     /**
      * Removes the entry for a name only if currently mapped to a given Ref
-     * @param name  name with which the specified value is associated
-     * @param cur   Ref expected to be associated with the specified key
-     * @return      true if the value was removed
-     * @throws IOException  if an exception occurs when communicating to the
-     *                      database
+     *
+     * @param name name with which the specified value is associated
+     * @param cur  Ref expected to be associated with the specified key
+     * @return true if the value was removed
+     * @throws IOException if an exception occurs when communicating to the
+     *                     database
      */
     public boolean remove(String name, Ref cur) throws IOException {
         final Ref curInStore = get(name);
@@ -192,8 +197,9 @@ public class RefStore {
     /**
      * Creates the Cassandra keyspace and refs table if it does
      * not already exist.
-     * @throws IOException  if an exception occurs when communicating to the
-     *                      database
+     *
+     * @throws IOException if an exception occurs when communicating to the
+     *                     database
      */
     private void createSchemaIfNotExist() throws IOException {
         try {
@@ -213,13 +219,14 @@ public class RefStore {
 
     /**
      * Parses a Cassandra refs table row and converts it to a Ref
-     * @param row           a single Cassandra row to parse
-     * @return              a ref, or null if the "row" parameter is null
-     * @throws IOException  if an exception occurs when communicating to the
-     *                      database
-     * @throws IllegalStateException    if the "type" field read back from the
-     *                                  database is not one of the four handled
-     *                                  types (@see RefType).
+     *
+     * @param row a single Cassandra row to parse
+     * @return a ref, or null if the "row" parameter is null
+     * @throws IOException           if an exception occurs when communicating to the
+     *                               database
+     * @throws IllegalStateException if the "type" field read back from the
+     *                               database is not one of the four handled
+     *                               types (@see RefType).
      */
     private Ref rowToRef(Row row) throws IOException {
         if (row == null) {
@@ -250,16 +257,17 @@ public class RefStore {
 
     /**
      * Inserts a single ref into the database
-     * @throws IllegalStateException    if the reference concrete type is not
-     *                                  one of the four handled classes
-     *                                  (@see RefType).
+     *
+     * @throws IllegalStateException if the reference concrete type is not
+     *                               one of the four handled classes
+     *                               (@see RefType).
      */
     private void putRef(String name, Ref r) throws IOException {
         if (r instanceof SymbolicRef) {
             putRow(name, RefType.SYMBOLIC, r.getTarget().getName(), "");
         } else if (r instanceof ObjectIdRef.PeeledNonTag) {
             putRow(name, RefType.PEELED_NONTAG, r.getObjectId().name(), "");
-        } else if (r instanceof ObjectIdRef.PeeledTag){
+        } else if (r instanceof ObjectIdRef.PeeledTag) {
             putRow(name, RefType.PEELED_TAG, r.getObjectId().name(),
                     r.getPeeledObjectId().toString());
         } else if (r instanceof ObjectIdRef.Unpeeled) {
@@ -272,17 +280,17 @@ public class RefStore {
     /**
      * Inserts a row into the refs table. This works for both insertion of a
      * new row, and updating an existing row.
-     * 
-     * @param name      the primary key
-     * @param type      a type where the value is mapped to an integer through
-     *                  the RefType enum
-     * @param value     the value, either a commit id or in the case of a
-     *                  symbolic reference, the target name
-     * @param auxValue  an additional value, either the peeled object id in the
-     *                  case of a peeled tag ref, or an empty string for all
-     *                  other types of commits
-     * @throws IOException  if an exception occurs when communicating to the
-     *                      database
+     *
+     * @param name     the primary key
+     * @param type     a type where the value is mapped to an integer through
+     *                 the RefType enum
+     * @param value    the value, either a commit id or in the case of a
+     *                 symbolic reference, the target name
+     * @param auxValue an additional value, either the peeled object id in the
+     *                 case of a peeled tag ref, or an empty string for all
+     *                 other types of commits
+     * @throws IOException if an exception occurs when communicating to the
+     *                     database
      */
     private void putRow(String name, RefType type, String value, String auxValue)
             throws IOException {
@@ -291,8 +299,8 @@ public class RefStore {
                     .value("name", name)
                     .value("type", type.getValue())
                     .value("value", value)
-                    .value("aux_value", auxValue);           
-            
+                    .value("aux_value", auxValue);
+
             session.execute(stmt);
         } catch (RuntimeException e) {
             e.printStackTrace();
@@ -302,17 +310,18 @@ public class RefStore {
 
     /**
      * Removes the ref row given by "name".
-     * 
+     * <p/>
      * Given name is the primary key (and unique) only a single row will be
      * removed.
-     * @throws IOException  if an exception occurs when communicating to the
-     *                      database
+     *
+     * @throws IOException if an exception occurs when communicating to the
+     *                     database
      */
     private void removeRef(String name) throws IOException {
         try {
             Statement stmt = QueryBuilder.delete()
                     .from(keyspace, TABLE_NAME)
-                    .where (QueryBuilder.eq("name", name));
+                    .where(QueryBuilder.eq("name", name));
             session.execute(stmt);
         } catch (RuntimeException e) {
             e.printStackTrace();

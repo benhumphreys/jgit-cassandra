@@ -33,6 +33,7 @@ public class StoreConnection {
 
     /**
      * Constructor
+     *
      * @param nodes a list of one or more Cassandra nodes to connect to. Note
      *              that not all Cassandra nodes in the cluster need be
      *              supplied; one will suffice however if that node is

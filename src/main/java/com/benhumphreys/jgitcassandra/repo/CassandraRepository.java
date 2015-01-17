@@ -35,7 +35,12 @@ public class CassandraRepository extends DfsRepository {
     private final DfsRefDatabase refdb;
 
     /**
-     * @param repoDesc
+     * Creating a new repository object may result in creating a new repository
+     * in the storage layer, or if the repository identified by "repoDesc" already
+     * exists, it will be used instead.
+     *
+     * @param repoDesc  description of the repository that this object will
+     *                  provide access to.
      */
     @SuppressWarnings("rawtypes")
     public CassandraRepository(DfsRepositoryDescription repoDesc, StoreConnection conn)

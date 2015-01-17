@@ -16,11 +16,11 @@
  */
 package com.benhumphreys.jgitcassandra;
 
-import static org.junit.Assert.*;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class CassandraRepositoryResolverTest {
 
@@ -47,8 +47,8 @@ public class CassandraRepositoryResolverTest {
         assertEquals("repo1",
                 CassandraRepositoryResolver.sanitiseName("repo1.git"));
     }
-    
-    @Test (expected = IllegalArgumentException.class)
+
+    @Test(expected = IllegalArgumentException.class)
     public final void testSanitiseNameInvalid() {
         CassandraRepositoryResolver.sanitiseName("DROP TABLE refs.git");
     }

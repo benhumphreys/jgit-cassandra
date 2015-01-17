@@ -26,13 +26,13 @@ public enum RefType {
     PEELED_NONTAG(2),
     PEELED_TAG(3),
     UNPEELED(4);
-    
+
     private final int value;
-    
+
     private RefType(int value) {
         this.value = value;
     }
-    
+
     public int getValue() {
         return value;
     }
